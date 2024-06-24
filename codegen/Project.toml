@@ -1,0 +1,8 @@
+name = "RocLinAlg"
+uuid = "269ca3c7-9e34-44f5-82e3-302526a6ac26"
+authors = ["Hannes <johannessmit@mobagel.com>"]
+version = "0.1.0"
+
+[deps]
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+Symbolics = "0c5d862f-8b57-4792-8d23-62f2024744c7"
