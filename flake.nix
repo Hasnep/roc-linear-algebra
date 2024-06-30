@@ -2,7 +2,7 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     flake-parts.url = "github:hercules-ci/flake-parts";
-    roc.url = "github:roc-lang/roc?rev=f7011c8e33b92a7e9f809e6f16849de9fcfa8dd7";
+    roc.url = "github:roc-lang/roc?rev=44d76d78a13e6b6b4adea075a93b3b46989704f2";
   };
 
   nixConfig = {
@@ -25,7 +25,7 @@
         ...
       }: {
         devShells.default = pkgs.mkShell {
-          name = "roc-lin-alg";
+          name = "roc-linear-algebra";
           packages = [
             inputs'.roc.packages.cli
             pkgs.just
