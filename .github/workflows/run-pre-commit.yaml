@@ -24,7 +24,7 @@ jobs:
         with:
           roc-version: nightly
       - name: Run Pre-commit
-        uses: pre-commit/action@v3.0.0
+        uses: pre-commit/action@v3.0.1
         env:
           # Prevent this action failing when running on the main branch
           SKIP: no-commit-to-branch
