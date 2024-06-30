@@ -25,3 +25,5 @@ jobs:
           roc-version: nightly
       - name: Test the library
         run: roc test src/main.roc
+      - name: Run all the examples
+        run: find examples -name '*.roc' -exec roc run {} \;
