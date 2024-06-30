@@ -95,4 +95,3 @@ div = \@Matrix1x1 aA, @Matrix1x1 bA ->
 isApproxEq : Matrix1x1, Matrix1x1, { rtol ? F64, atol ? F64 } -> Bool
 isApproxEq = \@Matrix1x1 aA, @Matrix1x1 bA, { rtol ? 0.00001, atol ? 0.00000001 } ->
     Num.isApproxEq aA bA { rtol, atol }
-

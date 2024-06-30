@@ -36,4 +36,3 @@ div = \@Matrix4x3 (aA, aB, aC, aD, aE, aF, aG, aH, aI, aJ, aK, aL), @Matrix4x3 (
 isApproxEq : Matrix4x3, Matrix4x3, { rtol ? F64, atol ? F64 } -> Bool
 isApproxEq = \@Matrix4x3 (aA, aB, aC, aD, aE, aF, aG, aH, aI, aJ, aK, aL), @Matrix4x3 (bA, bB, bC, bD, bE, bF, bG, bH, bI, bJ, bK, bL), { rtol ? 0.00001, atol ? 0.00000001 } ->
     Num.isApproxEq aA bA { rtol, atol } && Num.isApproxEq aB bB { rtol, atol } && Num.isApproxEq aC bC { rtol, atol } && Num.isApproxEq aD bD { rtol, atol } && Num.isApproxEq aE bE { rtol, atol } && Num.isApproxEq aF bF { rtol, atol } && Num.isApproxEq aG bG { rtol, atol } && Num.isApproxEq aH bH { rtol, atol } && Num.isApproxEq aI bI { rtol, atol } && Num.isApproxEq aJ bJ { rtol, atol } && Num.isApproxEq aK bK { rtol, atol } && Num.isApproxEq aL bL { rtol, atol }
-
