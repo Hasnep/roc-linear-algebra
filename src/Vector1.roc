@@ -56,4 +56,3 @@ dot = \aA, bA -> aA * bA
 isApproxEq : Vector1, Vector1, { rtol ? F64, atol ? F64 } -> Bool
 isApproxEq = \aA, bA, { rtol ? 0.00001, atol ? 0.00000001 } ->
     Num.isApproxEq aA bA { rtol, atol }
-

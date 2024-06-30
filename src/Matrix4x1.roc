@@ -43,4 +43,3 @@ div = \@Matrix4x1 (aA, aB, aC, aD), @Matrix4x1 (bA, bB, bC, bD) ->
 isApproxEq : Matrix4x1, Matrix4x1, { rtol ? F64, atol ? F64 } -> Bool
 isApproxEq = \@Matrix4x1 (aA, aB, aC, aD), @Matrix4x1 (bA, bB, bC, bD), { rtol ? 0.00001, atol ? 0.00000001 } ->
     Num.isApproxEq aA bA { rtol, atol } && Num.isApproxEq aB bB { rtol, atol } && Num.isApproxEq aC bC { rtol, atol } && Num.isApproxEq aD bD { rtol, atol }
-

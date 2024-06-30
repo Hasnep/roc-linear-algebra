@@ -61,4 +61,3 @@ cross = \(aA, aB, aC), (bA, bB, bC) ->
 isApproxEq : Vector3, Vector3, { rtol ? F64, atol ? F64 } -> Bool
 isApproxEq = \(aA, aB, aC), (bA, bB, bC), { rtol ? 0.00001, atol ? 0.00000001 } ->
     Num.isApproxEq aA bA { rtol, atol } && Num.isApproxEq aB bB { rtol, atol } && Num.isApproxEq aC bC { rtol, atol }
-

@@ -56,4 +56,3 @@ dot = \(aA, aB), (bA, bB) -> aA * bA + aB * bB
 isApproxEq : Vector2, Vector2, { rtol ? F64, atol ? F64 } -> Bool
 isApproxEq = \(aA, aB), (bA, bB), { rtol ? 0.00001, atol ? 0.00000001 } ->
     Num.isApproxEq aA bA { rtol, atol } && Num.isApproxEq aB bB { rtol, atol }
-
