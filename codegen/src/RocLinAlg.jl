@@ -3,112 +3,118 @@ module RocLinAlg
 using Symbolics
 using LinearAlgebra
 
-letters(n) = first(collect('a':'z'), n)
+convert_subscripts(s) = replace(string(s), (collect('₁':'₉') .=> collect(1:9))...)
 
-elements(n::Integer) = letters(n)
-elements(n::Integer, m::Integer) = letters(n * m)
-elements(n::Integer, m::Integer, prefix::String) =
-    [prefix * uppercase(s) for s in elements(n, m)]
-elements(n::Integer, prefix::String) = [prefix * uppercase(s) for s in elements(n)]
+lines(s) = split(s, '\n')
 
-function vec_to_letters(s, prefix = nothing)
-    return replace(
-        s,
-        collect(
-            ((isnothing(prefix) ? "" : prefix) .* collect('₁':'₉')) .=>
-                ((isnothing(prefix) ? uppercase : identity).(letters(9))),
-        )...,
-    )
-end
+indent(s) = join("    " .* lines(s), "\n")
 
-function matrix_to_letters(s, n, m, prefix = nothing)
-    subscripts = collect('₁':'₉')
-    return replace.(
-        s,
-        [
-            (isnothing(prefix) ? "" : prefix) * column_sub * "ˏ" * row_sub =>
-                (isnothing(prefix) ? uppercase : identity)(elements(n, m)[index]) for
-            (index, (column_sub, row_sub)) in enumerate(
-                vcat(
-                    [
-                        (column_sub, row_sub) for column_sub in first(subscripts, n),
-                        row_sub in first(subscripts, m)
-                    ]...,
-                ),
-            )
-        ]...,
-    )
-end
+function_definition(
+    name::String,
+    signature::Pair{Vector{String},String},
+    definition::Pair{Vector{String},String},
+) = """
+$name : $(join(first(signature),", ")) -> $(last(signature))
+$name = \\$(join(first(definition), ", ")) ->
+$(indent(last(definition)))
+"""
 
 function vector_module(n)
+    v = Symbolics.variables(:v, 1:n)
+
     a = Symbolics.variables(:a, 1:n)
     b = Symbolics.variables(:b, 1:n)
 
     vector_type = "Vector$n"
 
+    vector_to_roc(v) = "(" * join(convert_subscripts.(v), ", ") * ")"
+
     type_definition = "$vector_type : ($(join(repeat(["F64"], n), ", ")))"
 
-    zeros = """
+    zeros_ = """
     zeros : $vector_type
-    zeros =  ($(join(repeat(["0"], n), ", ")))
+    zeros = $(vector_to_roc(round.(Int, zeros(n))))
     """
 
-    ones = """
+    ones_ = """
     ones : $vector_type
-    ones =  ($(join(repeat(["1"], n), ", ")))
+    ones = $(vector_to_roc(round.(Int, ones(n))))
     """
 
-    from_list = """
-    fromList : List F64 -> Result $vector_type [InvalidSize]
-    fromList = \\list ->
-        when list is
-            [$(join(elements(n), ", "))] -> Ok ($(join(elements(n), ", ")))
-            _ -> Err InvalidSize
-    """
+    from_list = function_definition(
+        "fromList",
+        ["List F64"] => "Result $vector_type [InvalidSize]",
+        ["list"] => (
+            """
+            when list is
+                [$(join(convert_subscripts.(v), ", "))] -> Ok ($(join(convert_subscripts.(v), ", ")))
+                _ -> Err InvalidSize
+            """
+        ),
+    )
 
-    to_list = """
-    toList : $vector_type -> List F64
-    toList = \\($(join(elements(n), ", "))) -> [$(join(elements(n), ", "))]
-    """
 
-    display = """
-    display : $vector_type -> Str
-    display = \\($(join(elements(n), ", "))) ->
-        Str.joinWith ["[", $(join(["Num.toStr " * x for x in elements(n)], ", \", \",")), "]"] ""
-    """
+    to_list = function_definition(
+        "toList",
+        [vector_type] => "List F64",
+        [vector_to_roc(v)] => "[ $(join(convert_subscripts.(v), ", ")) ]",
+    )
 
-    elementwise_function(name, operator) = """
-    $(name) : $vector_type, $vector_type -> $vector_type
-    $(name) = \\($(join(elements(n, "a"), ", "))),  ($(join(elements(n, "b"), ", "))) ->
-         ($(join(elements(n, "a") .* " $(operator) " .* elements(n, "b"), ", ")))
-    """
+    display = function_definition(
+        "display",
+        [vector_type] => "Str",
+        [vector_to_roc(v)] => (
+            """
+            Str.joinWith [ "[", $(join(["Num.toStr " * x for x in convert_subscripts.(v)], ", \", \",")), "]" ] ""
+            """
+        ),
+    )
+
+    elementwise_function(name, operator) = function_definition(
+        name,
+        [vector_type, vector_type] => vector_type,
+        [vector_to_roc(a), vector_to_roc(b)] => vector_to_roc([
+            convert_subscripts(x) * " $operator " * convert_subscripts(y) for
+            (x, y) in zip(a, b)
+        ]),
+    )
 
     add = elementwise_function("add", "+")
     sub = elementwise_function("sub", "-")
     elementwise_mul = elementwise_function("elementwiseMul", "*")
     div = elementwise_function("div", "/")
 
-    dot_product = """
-    dot : $(vector_type), $(vector_type) -> F64
-    dot = \\ ($(join(elements(n,"a"), ", "))),  ($(join(elements(n,"b"), ", "))) -> $(vec_to_letters(string(dot(a,b))))
-    """
+    dot_product = function_definition(
+        "dot",
+        [vector_type, vector_type] => "F64",
+        [vector_to_roc(a), vector_to_roc(b)] =>
+            convert_subscripts(LinearAlgebra.dot(a, b)),
+    )
 
     cross_product =
         n == 3 ?
-        """
-cross : $(vector_type), $(vector_type) -> $(vector_type)
-cross = \\ ($(join(elements(n, "a"), ", "))),  ($(join(elements(n, "b"), ", "))) ->
-     ($(join(vec_to_letters.(string.(cross(a,b))), ", ")))
-""" : missing
+        function_definition(
+            "cross",
+            [vector_type, vector_type] => vector_type,
+            [vector_to_roc(a), vector_to_roc(b)] =>
+                vector_to_roc(LinearAlgebra.cross(a, b)),
+        ) : missing
 
-    is_approx_eq = """
-    isApproxEq : $(vector_type), $(vector_type), { rtol ? F64, atol ? F64 } -> Bool
-    isApproxEq = \\ ($(join(elements(n, "a"), ", "))),  ($(join(elements(n, "b"), ", "))), { rtol ? 0.00001, atol ? 0.00000001 } ->
-        $(join( ["Num.isApproxEq $xa $xb {rtol, atol}" for (xa,xb) in zip(elements(n, "a"),   elements(n, "b"))], " && "))
-    """
+    is_approx_eq = function_definition(
+        "isApproxEq",
+        [vector_type, vector_type, "{rtol ? F64, atol ? F64}"] => "Bool",
+        [vector_to_roc(a), vector_to_roc(b), "{ rtol ? 0.00001, atol ? 0.00000001 }"] =>
+            join(
+                [
+                    "Num.isApproxEq $xa $xb {rtol, atol}" for
+                    (xa, xb) in zip(convert_subscripts.(a), convert_subscripts.(b))
+                ],
+                " && ",
+            ),
+    )
 
     return roc_module(
-        skipmissing([
+        [
             # Type definition
             "Vector$(n)",
             # Constructors
@@ -126,12 +132,14 @@ cross = \\ ($(join(elements(n, "a"), ", "))),  ($(join(elements(n, "b"), ", ")))
             "dot",
             n == 3 ? "cross" : missing,
             "isApproxEq",
-        ]),
+        ] |>
+        skipmissing |>
+        collect,
         [],
-        skipmissing([
+        [
             type_definition,
-            zeros,
-            ones,
+            zeros_,
+            ones_,
             from_list,
             to_list,
             display,
@@ -142,7 +150,9 @@ cross = \\ ($(join(elements(n, "a"), ", "))),  ($(join(elements(n, "b"), ", ")))
             dot_product,
             cross_product,
             is_approx_eq,
-        ]),
+        ] |>
+        skipmissing |>
+        collect,
     )
 end
 
@@ -150,123 +160,142 @@ function matrix_module(n, m)
     is_square = n == m
     is_long = n == 1 || m == 1
 
+    x = Symbolics.variables(:x, 1:n, 1:m)
+    x_det = Symbolics.variable(:det)
+    v = (is_square || is_long) ? Symbolics.variables(:x, 1:max(n, m)) : missing
+
     a = Symbolics.variables(:a, 1:n, 1:m)
     b = Symbolics.variables(:b, 1:n, 1:m)
-    a_det = Symbolics.variable(:det)
 
     matrix_type = "Matrix$(n)x$(m)"
 
     expect_matrix = reshape([x % (n + 1) == 1 ? x : 0 for x = 1:(n*m)], n, m)
-    matrix_to_roc(m) = "@$matrix_type ($(join(vcat(m...), ", ")))"
-    vector_to_roc(v) = "($(join(v, ", ")))"
+    matrix_to_roc(m) = "@$matrix_type ($(join(vcat(convert_subscripts.(m)...), ", ")))"
+    vector_to_roc(v) = "($(join(convert_subscripts.(v), ", ")))"
 
     type_definition = "$matrix_type := ($(join(repeat(["F64"], n*m), ", ")))"
 
-    identity = is_square ? """
+    identity_ = is_square ? """
     identity : $matrix_type
-    identity = fromDiagonal ($(join(repeat(["1"], n), ", ")))
+    identity = fromDiagonal (diagonal ones)
     """ : missing
 
-    zeros = """
+    zeros_ = """
     zeros : $matrix_type
-    zeros = @$matrix_type ($(join(repeat(["0"], n*m), ", ")))
+    zeros = $(matrix_to_roc(round.(Int,zeros(n, m))))
     """
 
-    ones = """
+    ones_ = """
     ones : $matrix_type
-    ones = @$matrix_type ($(join(repeat(["1"], n*m), ", ")))
+    ones = $(matrix_to_roc(round.(Int,ones(n, m))))
     """
 
     from_diagonal =
         is_square ?
-        """
-        fromDiagonal : Vector$n.Vector$n -> $matrix_type
-        fromDiagonal = \\($(join(skipmissing([i == j ? matrix_to_letters(string(LinearAlgebra.diag(a)[i]),n,m,"a") : missing for i in 1:n, j in 1:m]), ", "))) ->
-            @$matrix_type ($(join([i == j ? matrix_to_letters(string(LinearAlgebra.diag(a)[i]),n,m,"a") : "0" for i in 1:n, j in 1:m], ", ")))
-        """ : missing
+        function_definition(
+            "fromDiagonal",
+            ["Vector$n.Vector$n"] => matrix_type,
+            [vector_to_roc(v)] => matrix_to_roc(LinearAlgebra.diagm(v)),
+        ) : missing
 
     from_vector =
-        is_long ? begin
-            nm = max(n, m)
-            """
-            fromVector : Vector$nm.Vector$nm -> $matrix_type
-            fromVector = \\($(join(elements(nm), ", "))) ->
-                @$matrix_type ($(join(elements(nm), ", ")))
-            """
-        end : missing
+        is_long ?
+        function_definition(
+            "fromVector",
+            ["Vector$(max(n, m)).Vector$(max(n, m))"] => matrix_type,
+            [vector_to_roc(v)] => matrix_to_roc(v),
+        ) : missing
 
     transpose =
         is_square ?
-        """
-        transpose : $matrix_type -> $matrix_type
-        transpose = \\@$matrix_type ($(join(elements(n*m), ", "))) ->
-            @$matrix_type ($(join(vcat(matrix_to_letters.(string.(LinearAlgebra.transpose(a)), n, m, "a")...), ",")))
-        """ : missing
+        function_definition(
+            "transpose",
+            [matrix_type] => matrix_type,
+            [matrix_to_roc(x)] => matrix_to_roc(LinearAlgebra.transpose(x)),
+        ) : missing
 
     diagonal =
         is_square ?
-        begin
-            diagonal_letters =
-                matrix_to_letters.(
-                    string.(diag(Symbolics.variables(:a, 1:n, 1:m))),
-                    n,
-                    m,
-                    "a",
-                )
-            """
-            diagonal : $matrix_type -> Vector$n.Vector$n
-            diagonal = \\@$matrix_type ($(join([(string(e) in diagonal_letters ? e : "_" * e ) for e in elements(n*m)], ", "))) -> ($(join(diagonal_letters, ", ")))
+        (
+            function_definition(
+                "diagonal",
+                [matrix_type] => "Vector$n.Vector$n",
+                [
+                    matrix_to_roc([
+                        index[1] == index[2] ? a : "_" * string(a) for
+                        (index, a) in zip(CartesianIndices(x), x)
+                    ]),
+                ] => vector_to_roc(LinearAlgebra.diag(x)),
+            ) * (
+                """
 
-            expect
-                out = diagonal ($(matrix_to_roc(expect_matrix)))
-                out |> Vector$(n).isApproxEq ($(vector_to_roc(LinearAlgebra.diag(expect_matrix)))) {}
-            """
-        end : missing
+                expect
+                    out = diagonal ($(matrix_to_roc(expect_matrix)))
+                    out |> Vector$(n).isApproxEq ($(vector_to_roc(LinearAlgebra.diag(expect_matrix)))) {}
+                """
+            )
+        ) : missing
 
     determinant =
-        is_square ? """
-                    determinant : $matrix_type -> F64
-                    determinant = \\@$matrix_type ($(join(elements(n*m), ", "))) ->
-                        $(matrix_to_letters(string.(LinearAlgebra.det(a)),n,m,"a"))
+        is_square ?
+        (
+            function_definition(
+                "determinant",
+                [matrix_type] => "F64",
+                [matrix_to_roc(x)] => convert_subscripts(LinearAlgebra.det(x)),
+            ) * """
 
-                    expect
-                        out = determinant ($(matrix_to_roc(expect_matrix)))
-                        out |> Num.isApproxEq $(LinearAlgebra.det(expect_matrix)) {}
-                    """ : missing
+                expect
+                    out = determinant ($(matrix_to_roc(expect_matrix)))
+                    out |> Num.isApproxEq $(LinearAlgebra.det(expect_matrix)) {}
+                """
+        ) : missing
 
     invert =
         is_square ?
-        """
-        invert : $matrix_type -> Result $matrix_type [NonInvertible]
-        invert = \\@$matrix_type ($(join(elements(n*m), ", "))) ->
-            det = determinant (@$matrix_type ($(join(elements(n * m), ", "))))
-            if Num.isApproxEq det 0 {} then
-                Err NonInvertible
-            else
-                Ok (
-                    @$matrix_type (
-                        $(join(vcat(matrix_to_letters.(string.(LinearAlgebra.inv(a) .* LinearAlgebra.det(a) ./ a_det), n, m, "a")...), ","))
-                    )
-                )
+        (
+            function_definition(
+                "invert",
+                [matrix_type] => "Result $matrix_type [NonInvertible]",
+                [matrix_to_roc(x)] => (
+                    """
+                    det = determinant ($(matrix_to_roc(x)))
+                    if Num.isApproxEq det 0 {} then
+                        Err NonInvertible
+                    else
+                        Ok ($(matrix_to_roc(LinearAlgebra.inv(x) .* LinearAlgebra.det(x) ./ x_det)))
+                    """
+                ),
+            ) * """
+                expect
+                    outResult = invert ($(matrix_to_roc(expect_matrix)))
+                    when outResult is
+                        Ok out -> out |> isApproxEq ($(matrix_to_roc(LinearAlgebra.inv(expect_matrix)))) {}
+                        Err NonInvertible -> Bool.false
+                """
+        ) : missing
 
-        expect
-            outResult = invert ($(matrix_to_roc(expect_matrix)))
-            when outResult is
-                Ok out -> out |> isApproxEq ($(matrix_to_roc(LinearAlgebra.inv(expect_matrix)))) {}
-                Err NonInvertible -> Bool.false
-        """ : missing
+    is_approx_eq = function_definition(
+        "isApproxEq",
+        [matrix_type, matrix_type, "{rtol ? F64, atol ? F64}"] => "Bool",
+        [matrix_to_roc(a), matrix_to_roc(b), "{ rtol ? 0.00001, atol ? 0.00000001 }"] =>
+            join(
+                [
+                    "Num.isApproxEq $xa $xb {rtol, atol}" for
+                    (xa, xb) in zip(convert_subscripts.(a), convert_subscripts.(b))
+                ],
+                " && ",
+            ),
+    )
 
-    is_approx_eq = """
-    isApproxEq : $matrix_type, $matrix_type, { rtol ? F64, atol ? F64 } -> Bool
-    isApproxEq = \\@$matrix_type ($(join(elements(n*m, "a"), ", "))), @$matrix_type ($(join(elements(n*m, "b"), ", "))), { rtol ? 0.00001, atol ? 0.00000001 } ->
-        $(join( ["Num.isApproxEq $xa $xb {rtol, atol}" for (xa, xb) in zip(elements(n*m, "a"),   elements(n*m, "b"))], " && "))
-    """
-
-    elementwise_function(name, operator) = """
-    $name : $matrix_type, $matrix_type -> $matrix_type
-    $name = \\@$matrix_type ($(join(elements(n*m, "a"), ", "))), @$matrix_type ($(join(elements(n*m, "b"), ", "))) ->
-        @$matrix_type ($(join(elements(n*m, "a") .* " $operator " .* elements(n*m, "b"), ", ")))
-    """
+    elementwise_function(name, operator) = function_definition(
+        name,
+        [matrix_type, matrix_type] => matrix_type,
+        [matrix_to_roc(a), matrix_to_roc(b)] => matrix_to_roc([
+            x * " $operator " * y for
+            (x, y) in zip(convert_subscripts.(a), convert_subscripts.(b))
+        ]),
+    )
 
     add = elementwise_function("add", "+")
     sub = elementwise_function("sub", "-")
@@ -274,7 +303,7 @@ function matrix_module(n, m)
     div = elementwise_function("div", "/")
 
     return roc_module(
-        skipmissing([
+        [
             # Type definition
             "Matrix$(n)x$(m)",
             # Constructors
@@ -300,15 +329,17 @@ function matrix_module(n, m)
             # "dot",
             # "cross",
             "isApproxEq",
-        ]),
-        skipmissing([(is_long || is_square) ? "Vector$(max(n,m))" : missing]),
-        skipmissing([
+        ] |>
+        skipmissing |>
+        collect,
+        [(is_long || is_square) ? "Vector$(max(n,m))" : missing] |> skipmissing |> collect,
+        [
             # Type definition
             type_definition,
             # Constructors
-            identity,
-            zeros,
-            ones,
+            identity_,
+            zeros_,
+            ones_,
             # from_columns,
             # from_rows,
             from_diagonal,
@@ -328,7 +359,9 @@ function matrix_module(n, m)
             # dot_product,
             # cross_product,
             is_approx_eq,
-        ]),
+        ] |>
+        skipmissing |>
+        collect,
     )
 end
 

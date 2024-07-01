@@ -24,35 +24,37 @@ ones = (1, 1)
 fromList : List F64 -> Result Vector2 [InvalidSize]
 fromList = \list ->
     when list is
-        [a, b] -> Ok (a, b)
+        [v1, v2] -> Ok (v1, v2)
         _ -> Err InvalidSize
 
 toList : Vector2 -> List F64
-toList = \(a, b) -> [a, b]
+toList = \(v1, v2) ->
+    [v1, v2]
 
 display : Vector2 -> Str
-display = \(a, b) ->
-    Str.joinWith ["[", Num.toStr a, ", ", Num.toStr b, "]"] ""
+display = \(v1, v2) ->
+    Str.joinWith ["[", Num.toStr v1, ", ", Num.toStr v2, "]"] ""
 
 add : Vector2, Vector2 -> Vector2
-add = \(aA, aB), (bA, bB) ->
-    (aA + bA, aB + bB)
+add = \(a1, a2), (b1, b2) ->
+    (a1 + b1, a2 + b2)
 
 sub : Vector2, Vector2 -> Vector2
-sub = \(aA, aB), (bA, bB) ->
-    (aA - bA, aB - bB)
+sub = \(a1, a2), (b1, b2) ->
+    (a1 - b1, a2 - b2)
 
 elementwiseMul : Vector2, Vector2 -> Vector2
-elementwiseMul = \(aA, aB), (bA, bB) ->
-    (aA * bA, aB * bB)
+elementwiseMul = \(a1, a2), (b1, b2) ->
+    (a1 * b1, a2 * b2)
 
 div : Vector2, Vector2 -> Vector2
-div = \(aA, aB), (bA, bB) ->
-    (aA / bA, aB / bB)
+div = \(a1, a2), (b1, b2) ->
+    (a1 / b1, a2 / b2)
 
 dot : Vector2, Vector2 -> F64
-dot = \(aA, aB), (bA, bB) -> aA * bA + aB * bB
+dot = \(a1, a2), (b1, b2) ->
+    a1 * b1 + a2 * b2
 
 isApproxEq : Vector2, Vector2, { rtol ? F64, atol ? F64 } -> Bool
-isApproxEq = \(aA, aB), (bA, bB), { rtol ? 0.00001, atol ? 0.00000001 } ->
-    Num.isApproxEq aA bA { rtol, atol } && Num.isApproxEq aB bB { rtol, atol }
+isApproxEq = \(a1, a2), (b1, b2), { rtol ? 0.00001, atol ? 0.00000001 } ->
+    Num.isApproxEq a1 b1 { rtol, atol } && Num.isApproxEq a2 b2 { rtol, atol }
