@@ -1,7 +1,7 @@
 default: codegen format check test docs examples
 
 codegen:
-    julia --project=./codegen -e 'import Pkg; Pkg.instantiate(); import RocLinAlg; RocLinAlg.main();'
+    julia --project=./codegen --startup-file=no --quiet --compile=min --optimize=0 --eval='import Pkg; Pkg.instantiate(); import RocLinAlg; RocLinAlg.main();'
     @just format
 
 format:
