@@ -7,6 +7,7 @@ codegen:
 format:
     roc format src/
     roc format examples/
+    cd codegen && julia --startup-file=no --quiet --compile=min --optimize=0 --eval='import JuliaFormatter; JuliaFormatter.format(".")'
 
 check:
     roc check src/main.roc
