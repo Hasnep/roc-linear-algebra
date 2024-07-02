@@ -20,7 +20,7 @@ import Vector4
 Matrix4x4 := (F64, F64, F64, F64, F64, F64, F64, F64, F64, F64, F64, F64, F64, F64, F64, F64)
 
 identity : Matrix4x4
-identity = fromDiagonal (1, 1, 1, 1)
+identity = fromDiagonal (diagonal ones)
 
 zeros : Matrix4x4
 zeros = @Matrix4x4 (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
@@ -29,55 +29,36 @@ ones : Matrix4x4
 ones = @Matrix4x4 (1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1)
 
 fromDiagonal : Vector4.Vector4 -> Matrix4x4
-fromDiagonal = \(a, f, k, p) ->
-    @Matrix4x4 (a, 0, 0, 0, 0, f, 0, 0, 0, 0, k, 0, 0, 0, 0, p)
+fromDiagonal = \(x1, x2, x3, x4) ->
+    @Matrix4x4 (x1, 0, 0, 0, 0, x2, 0, 0, 0, 0, x3, 0, 0, 0, 0, x4)
 
 transpose : Matrix4x4 -> Matrix4x4
-transpose = \@Matrix4x4 (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p) ->
-    @Matrix4x4 (a, e, i, m, b, f, j, n, c, g, k, o, d, h, l, p)
+transpose = \@Matrix4x4 (x1ˏ1, x2ˏ1, x3ˏ1, x4ˏ1, x1ˏ2, x2ˏ2, x3ˏ2, x4ˏ2, x1ˏ3, x2ˏ3, x3ˏ3, x4ˏ3, x1ˏ4, x2ˏ4, x3ˏ4, x4ˏ4) ->
+    @Matrix4x4 (x1ˏ1, x1ˏ2, x1ˏ3, x1ˏ4, x2ˏ1, x2ˏ2, x2ˏ3, x2ˏ4, x3ˏ1, x3ˏ2, x3ˏ3, x3ˏ4, x4ˏ1, x4ˏ2, x4ˏ3, x4ˏ4)
 
 diagonal : Matrix4x4 -> Vector4.Vector4
-diagonal = \@Matrix4x4 (a, _b, _c, _d, _e, f, _g, _h, _i, _j, k, _l, _m, _n, _o, p) -> (a, f, k, p)
+diagonal = \@Matrix4x4 (x1ˏ1, _x2ˏ1, _x3ˏ1, _x4ˏ1, _x1ˏ2, x2ˏ2, _x3ˏ2, _x4ˏ2, _x1ˏ3, _x2ˏ3, x3ˏ3, _x4ˏ3, _x1ˏ4, _x2ˏ4, _x3ˏ4, x4ˏ4) ->
+    (x1ˏ1, x2ˏ2, x3ˏ3, x4ˏ4)
 
 expect
     out = diagonal (@Matrix4x4 (1, 0, 0, 0, 0, 6, 0, 0, 0, 0, 11, 0, 0, 0, 0, 16))
     out |> Vector4.isApproxEq ((1, 6, 11, 16)) {}
 
 determinant : Matrix4x4 -> F64
-determinant = \@Matrix4x4 (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p) ->
-    a * (f * (k * p - o * l) - j * (g * p - o * h) + n * (g * l - k * h)) - e * (b * (k * p - o * l) - j * (c * p - o * d) + n * (c * l - k * d)) + i * (b * (g * p - o * h) - f * (c * p - o * d) + n * (c * h - g * d)) - m * (b * (g * l - k * h) - f * (c * l - k * d) + j * (c * h - g * d))
+determinant = \@Matrix4x4 (x1ˏ1, x2ˏ1, x3ˏ1, x4ˏ1, x1ˏ2, x2ˏ2, x3ˏ2, x4ˏ2, x1ˏ3, x2ˏ3, x3ˏ3, x4ˏ3, x1ˏ4, x2ˏ4, x3ˏ4, x4ˏ4) ->
+    x1ˏ1 * (x2ˏ2 * (x3ˏ3 * x4ˏ4 - x3ˏ4 * x4ˏ3) - x2ˏ3 * (x3ˏ2 * x4ˏ4 - x3ˏ4 * x4ˏ2) + x2ˏ4 * (x3ˏ2 * x4ˏ3 - x3ˏ3 * x4ˏ2)) - x1ˏ2 * (x2ˏ1 * (x3ˏ3 * x4ˏ4 - x3ˏ4 * x4ˏ3) - x2ˏ3 * (x3ˏ1 * x4ˏ4 - x3ˏ4 * x4ˏ1) + x2ˏ4 * (x3ˏ1 * x4ˏ3 - x3ˏ3 * x4ˏ1)) + x1ˏ3 * (x2ˏ1 * (x3ˏ2 * x4ˏ4 - x3ˏ4 * x4ˏ2) - x2ˏ2 * (x3ˏ1 * x4ˏ4 - x3ˏ4 * x4ˏ1) + x2ˏ4 * (x3ˏ1 * x4ˏ2 - x3ˏ2 * x4ˏ1)) - x1ˏ4 * (x2ˏ1 * (x3ˏ2 * x4ˏ3 - x3ˏ3 * x4ˏ2) - x2ˏ2 * (x3ˏ1 * x4ˏ3 - x3ˏ3 * x4ˏ1) + x2ˏ3 * (x3ˏ1 * x4ˏ2 - x3ˏ2 * x4ˏ1))
 
 expect
     out = determinant (@Matrix4x4 (1, 0, 0, 0, 0, 6, 0, 0, 0, 0, 11, 0, 0, 0, 0, 16))
     out |> Num.isApproxEq 1056.0 {}
 
 invert : Matrix4x4 -> Result Matrix4x4 [NonInvertible]
-invert = \@Matrix4x4 (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p) ->
-    det = determinant (@Matrix4x4 (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p))
+invert = \@Matrix4x4 (x1ˏ1, x2ˏ1, x3ˏ1, x4ˏ1, x1ˏ2, x2ˏ2, x3ˏ2, x4ˏ2, x1ˏ3, x2ˏ3, x3ˏ3, x4ˏ3, x1ˏ4, x2ˏ4, x3ˏ4, x4ˏ4) ->
+    det = determinant (@Matrix4x4 (x1ˏ1, x2ˏ1, x3ˏ1, x4ˏ1, x1ˏ2, x2ˏ2, x3ˏ2, x4ˏ2, x1ˏ3, x2ˏ3, x3ˏ3, x4ˏ3, x1ˏ4, x2ˏ4, x3ˏ4, x4ˏ4))
     if Num.isApproxEq det 0 {} then
         Err NonInvertible
     else
-        Ok
-            (
-                @Matrix4x4 (
-                    (f * (k * p - o * l) - j * (g * p - o * h) + n * (g * l - k * h)) / det,
-                    (-b * (k * p - o * l) + j * (c * p - o * d) - n * (c * l - k * d)) / det,
-                    (b * (g * p - o * h) - f * (c * p - o * d) + n * (c * h - g * d)) / det,
-                    (-b * (g * l - k * h) + f * (c * l - k * d) - j * (c * h - g * d)) / det,
-                    (-e * (k * p - o * l) + i * (g * p - o * h) - m * (g * l - k * h)) / det,
-                    (a * (k * p - o * l) - i * (c * p - o * d) + m * (c * l - k * d)) / det,
-                    (-a * (g * p - o * h) + e * (c * p - o * d) - m * (c * h - g * d)) / det,
-                    (a * (g * l - k * h) - e * (c * l - k * d) + i * (c * h - g * d)) / det,
-                    (e * (j * p - n * l) - i * (f * p - n * h) + m * (f * l - j * h)) / det,
-                    (-a * (j * p - n * l) + i * (b * p - n * d) - m * (b * l - j * d)) / det,
-                    (a * (f * p - n * h) - e * (b * p - n * d) + m * (b * h - f * d)) / det,
-                    (-a * (f * l - j * h) + e * (b * l - j * d) - i * (b * h - f * d)) / det,
-                    (-e * (j * o - n * k) + i * (f * o - n * g) - m * (f * k - j * g)) / det,
-                    (a * (j * o - n * k) - i * (b * o - n * c) + m * (b * k - j * c)) / det,
-                    (-a * (f * o - n * g) + e * (b * o - n * c) - m * (b * g - f * c)) / det,
-                    (a * (f * k - j * g) - e * (b * k - j * c) + i * (b * g - f * c)) / det,
-                )
-            )
+        Ok (@Matrix4x4 ((x2ˏ2 * (x3ˏ3 * x4ˏ4 - x3ˏ4 * x4ˏ3) - x2ˏ3 * (x3ˏ2 * x4ˏ4 - x3ˏ4 * x4ˏ2) + x2ˏ4 * (x3ˏ2 * x4ˏ3 - x3ˏ3 * x4ˏ2)) / det, (-x2ˏ1 * (x3ˏ3 * x4ˏ4 - x3ˏ4 * x4ˏ3) + x2ˏ3 * (x3ˏ1 * x4ˏ4 - x3ˏ4 * x4ˏ1) - x2ˏ4 * (x3ˏ1 * x4ˏ3 - x3ˏ3 * x4ˏ1)) / det, (x2ˏ1 * (x3ˏ2 * x4ˏ4 - x3ˏ4 * x4ˏ2) - x2ˏ2 * (x3ˏ1 * x4ˏ4 - x3ˏ4 * x4ˏ1) + x2ˏ4 * (x3ˏ1 * x4ˏ2 - x3ˏ2 * x4ˏ1)) / det, (-x2ˏ1 * (x3ˏ2 * x4ˏ3 - x3ˏ3 * x4ˏ2) + x2ˏ2 * (x3ˏ1 * x4ˏ3 - x3ˏ3 * x4ˏ1) - x2ˏ3 * (x3ˏ1 * x4ˏ2 - x3ˏ2 * x4ˏ1)) / det, (-x1ˏ2 * (x3ˏ3 * x4ˏ4 - x3ˏ4 * x4ˏ3) + x1ˏ3 * (x3ˏ2 * x4ˏ4 - x3ˏ4 * x4ˏ2) - x1ˏ4 * (x3ˏ2 * x4ˏ3 - x3ˏ3 * x4ˏ2)) / det, (x1ˏ1 * (x3ˏ3 * x4ˏ4 - x3ˏ4 * x4ˏ3) - x1ˏ3 * (x3ˏ1 * x4ˏ4 - x3ˏ4 * x4ˏ1) + x1ˏ4 * (x3ˏ1 * x4ˏ3 - x3ˏ3 * x4ˏ1)) / det, (-x1ˏ1 * (x3ˏ2 * x4ˏ4 - x3ˏ4 * x4ˏ2) + x1ˏ2 * (x3ˏ1 * x4ˏ4 - x3ˏ4 * x4ˏ1) - x1ˏ4 * (x3ˏ1 * x4ˏ2 - x3ˏ2 * x4ˏ1)) / det, (x1ˏ1 * (x3ˏ2 * x4ˏ3 - x3ˏ3 * x4ˏ2) - x1ˏ2 * (x3ˏ1 * x4ˏ3 - x3ˏ3 * x4ˏ1) + x1ˏ3 * (x3ˏ1 * x4ˏ2 - x3ˏ2 * x4ˏ1)) / det, (x1ˏ2 * (x2ˏ3 * x4ˏ4 - x2ˏ4 * x4ˏ3) - x1ˏ3 * (x2ˏ2 * x4ˏ4 - x2ˏ4 * x4ˏ2) + x1ˏ4 * (x2ˏ2 * x4ˏ3 - x2ˏ3 * x4ˏ2)) / det, (-x1ˏ1 * (x2ˏ3 * x4ˏ4 - x2ˏ4 * x4ˏ3) + x1ˏ3 * (x2ˏ1 * x4ˏ4 - x2ˏ4 * x4ˏ1) - x1ˏ4 * (x2ˏ1 * x4ˏ3 - x2ˏ3 * x4ˏ1)) / det, (x1ˏ1 * (x2ˏ2 * x4ˏ4 - x2ˏ4 * x4ˏ2) - x1ˏ2 * (x2ˏ1 * x4ˏ4 - x2ˏ4 * x4ˏ1) + x1ˏ4 * (x2ˏ1 * x4ˏ2 - x2ˏ2 * x4ˏ1)) / det, (-x1ˏ1 * (x2ˏ2 * x4ˏ3 - x2ˏ3 * x4ˏ2) + x1ˏ2 * (x2ˏ1 * x4ˏ3 - x2ˏ3 * x4ˏ1) - x1ˏ3 * (x2ˏ1 * x4ˏ2 - x2ˏ2 * x4ˏ1)) / det, (-x1ˏ2 * (x2ˏ3 * x3ˏ4 - x2ˏ4 * x3ˏ3) + x1ˏ3 * (x2ˏ2 * x3ˏ4 - x2ˏ4 * x3ˏ2) - x1ˏ4 * (x2ˏ2 * x3ˏ3 - x2ˏ3 * x3ˏ2)) / det, (x1ˏ1 * (x2ˏ3 * x3ˏ4 - x2ˏ4 * x3ˏ3) - x1ˏ3 * (x2ˏ1 * x3ˏ4 - x2ˏ4 * x3ˏ1) + x1ˏ4 * (x2ˏ1 * x3ˏ3 - x2ˏ3 * x3ˏ1)) / det, (-x1ˏ1 * (x2ˏ2 * x3ˏ4 - x2ˏ4 * x3ˏ2) + x1ˏ2 * (x2ˏ1 * x3ˏ4 - x2ˏ4 * x3ˏ1) - x1ˏ4 * (x2ˏ1 * x3ˏ2 - x2ˏ2 * x3ˏ1)) / det, (x1ˏ1 * (x2ˏ2 * x3ˏ3 - x2ˏ3 * x3ˏ2) - x1ˏ2 * (x2ˏ1 * x3ˏ3 - x2ˏ3 * x3ˏ1) + x1ˏ3 * (x2ˏ1 * x3ˏ2 - x2ˏ2 * x3ˏ1)) / det))
 
 expect
     outResult = invert (@Matrix4x4 (1, 0, 0, 0, 0, 6, 0, 0, 0, 0, 11, 0, 0, 0, 0, 16))
@@ -86,21 +67,21 @@ expect
         Err NonInvertible -> Bool.false
 
 add : Matrix4x4, Matrix4x4 -> Matrix4x4
-add = \@Matrix4x4 (aA, aB, aC, aD, aE, aF, aG, aH, aI, aJ, aK, aL, aM, aN, aO, aP), @Matrix4x4 (bA, bB, bC, bD, bE, bF, bG, bH, bI, bJ, bK, bL, bM, bN, bO, bP) ->
-    @Matrix4x4 (aA + bA, aB + bB, aC + bC, aD + bD, aE + bE, aF + bF, aG + bG, aH + bH, aI + bI, aJ + bJ, aK + bK, aL + bL, aM + bM, aN + bN, aO + bO, aP + bP)
+add = \@Matrix4x4 (a1ˏ1, a2ˏ1, a3ˏ1, a4ˏ1, a1ˏ2, a2ˏ2, a3ˏ2, a4ˏ2, a1ˏ3, a2ˏ3, a3ˏ3, a4ˏ3, a1ˏ4, a2ˏ4, a3ˏ4, a4ˏ4), @Matrix4x4 (b1ˏ1, b2ˏ1, b3ˏ1, b4ˏ1, b1ˏ2, b2ˏ2, b3ˏ2, b4ˏ2, b1ˏ3, b2ˏ3, b3ˏ3, b4ˏ3, b1ˏ4, b2ˏ4, b3ˏ4, b4ˏ4) ->
+    @Matrix4x4 (a1ˏ1 + b1ˏ1, a2ˏ1 + b2ˏ1, a3ˏ1 + b3ˏ1, a4ˏ1 + b4ˏ1, a1ˏ2 + b1ˏ2, a2ˏ2 + b2ˏ2, a3ˏ2 + b3ˏ2, a4ˏ2 + b4ˏ2, a1ˏ3 + b1ˏ3, a2ˏ3 + b2ˏ3, a3ˏ3 + b3ˏ3, a4ˏ3 + b4ˏ3, a1ˏ4 + b1ˏ4, a2ˏ4 + b2ˏ4, a3ˏ4 + b3ˏ4, a4ˏ4 + b4ˏ4)
 
 sub : Matrix4x4, Matrix4x4 -> Matrix4x4
-sub = \@Matrix4x4 (aA, aB, aC, aD, aE, aF, aG, aH, aI, aJ, aK, aL, aM, aN, aO, aP), @Matrix4x4 (bA, bB, bC, bD, bE, bF, bG, bH, bI, bJ, bK, bL, bM, bN, bO, bP) ->
-    @Matrix4x4 (aA - bA, aB - bB, aC - bC, aD - bD, aE - bE, aF - bF, aG - bG, aH - bH, aI - bI, aJ - bJ, aK - bK, aL - bL, aM - bM, aN - bN, aO - bO, aP - bP)
+sub = \@Matrix4x4 (a1ˏ1, a2ˏ1, a3ˏ1, a4ˏ1, a1ˏ2, a2ˏ2, a3ˏ2, a4ˏ2, a1ˏ3, a2ˏ3, a3ˏ3, a4ˏ3, a1ˏ4, a2ˏ4, a3ˏ4, a4ˏ4), @Matrix4x4 (b1ˏ1, b2ˏ1, b3ˏ1, b4ˏ1, b1ˏ2, b2ˏ2, b3ˏ2, b4ˏ2, b1ˏ3, b2ˏ3, b3ˏ3, b4ˏ3, b1ˏ4, b2ˏ4, b3ˏ4, b4ˏ4) ->
+    @Matrix4x4 (a1ˏ1 - b1ˏ1, a2ˏ1 - b2ˏ1, a3ˏ1 - b3ˏ1, a4ˏ1 - b4ˏ1, a1ˏ2 - b1ˏ2, a2ˏ2 - b2ˏ2, a3ˏ2 - b3ˏ2, a4ˏ2 - b4ˏ2, a1ˏ3 - b1ˏ3, a2ˏ3 - b2ˏ3, a3ˏ3 - b3ˏ3, a4ˏ3 - b4ˏ3, a1ˏ4 - b1ˏ4, a2ˏ4 - b2ˏ4, a3ˏ4 - b3ˏ4, a4ˏ4 - b4ˏ4)
 
 elementwiseMul : Matrix4x4, Matrix4x4 -> Matrix4x4
-elementwiseMul = \@Matrix4x4 (aA, aB, aC, aD, aE, aF, aG, aH, aI, aJ, aK, aL, aM, aN, aO, aP), @Matrix4x4 (bA, bB, bC, bD, bE, bF, bG, bH, bI, bJ, bK, bL, bM, bN, bO, bP) ->
-    @Matrix4x4 (aA * bA, aB * bB, aC * bC, aD * bD, aE * bE, aF * bF, aG * bG, aH * bH, aI * bI, aJ * bJ, aK * bK, aL * bL, aM * bM, aN * bN, aO * bO, aP * bP)
+elementwiseMul = \@Matrix4x4 (a1ˏ1, a2ˏ1, a3ˏ1, a4ˏ1, a1ˏ2, a2ˏ2, a3ˏ2, a4ˏ2, a1ˏ3, a2ˏ3, a3ˏ3, a4ˏ3, a1ˏ4, a2ˏ4, a3ˏ4, a4ˏ4), @Matrix4x4 (b1ˏ1, b2ˏ1, b3ˏ1, b4ˏ1, b1ˏ2, b2ˏ2, b3ˏ2, b4ˏ2, b1ˏ3, b2ˏ3, b3ˏ3, b4ˏ3, b1ˏ4, b2ˏ4, b3ˏ4, b4ˏ4) ->
+    @Matrix4x4 (a1ˏ1 * b1ˏ1, a2ˏ1 * b2ˏ1, a3ˏ1 * b3ˏ1, a4ˏ1 * b4ˏ1, a1ˏ2 * b1ˏ2, a2ˏ2 * b2ˏ2, a3ˏ2 * b3ˏ2, a4ˏ2 * b4ˏ2, a1ˏ3 * b1ˏ3, a2ˏ3 * b2ˏ3, a3ˏ3 * b3ˏ3, a4ˏ3 * b4ˏ3, a1ˏ4 * b1ˏ4, a2ˏ4 * b2ˏ4, a3ˏ4 * b3ˏ4, a4ˏ4 * b4ˏ4)
 
 div : Matrix4x4, Matrix4x4 -> Matrix4x4
-div = \@Matrix4x4 (aA, aB, aC, aD, aE, aF, aG, aH, aI, aJ, aK, aL, aM, aN, aO, aP), @Matrix4x4 (bA, bB, bC, bD, bE, bF, bG, bH, bI, bJ, bK, bL, bM, bN, bO, bP) ->
-    @Matrix4x4 (aA / bA, aB / bB, aC / bC, aD / bD, aE / bE, aF / bF, aG / bG, aH / bH, aI / bI, aJ / bJ, aK / bK, aL / bL, aM / bM, aN / bN, aO / bO, aP / bP)
+div = \@Matrix4x4 (a1ˏ1, a2ˏ1, a3ˏ1, a4ˏ1, a1ˏ2, a2ˏ2, a3ˏ2, a4ˏ2, a1ˏ3, a2ˏ3, a3ˏ3, a4ˏ3, a1ˏ4, a2ˏ4, a3ˏ4, a4ˏ4), @Matrix4x4 (b1ˏ1, b2ˏ1, b3ˏ1, b4ˏ1, b1ˏ2, b2ˏ2, b3ˏ2, b4ˏ2, b1ˏ3, b2ˏ3, b3ˏ3, b4ˏ3, b1ˏ4, b2ˏ4, b3ˏ4, b4ˏ4) ->
+    @Matrix4x4 (a1ˏ1 / b1ˏ1, a2ˏ1 / b2ˏ1, a3ˏ1 / b3ˏ1, a4ˏ1 / b4ˏ1, a1ˏ2 / b1ˏ2, a2ˏ2 / b2ˏ2, a3ˏ2 / b3ˏ2, a4ˏ2 / b4ˏ2, a1ˏ3 / b1ˏ3, a2ˏ3 / b2ˏ3, a3ˏ3 / b3ˏ3, a4ˏ3 / b4ˏ3, a1ˏ4 / b1ˏ4, a2ˏ4 / b2ˏ4, a3ˏ4 / b3ˏ4, a4ˏ4 / b4ˏ4)
 
 isApproxEq : Matrix4x4, Matrix4x4, { rtol ? F64, atol ? F64 } -> Bool
-isApproxEq = \@Matrix4x4 (aA, aB, aC, aD, aE, aF, aG, aH, aI, aJ, aK, aL, aM, aN, aO, aP), @Matrix4x4 (bA, bB, bC, bD, bE, bF, bG, bH, bI, bJ, bK, bL, bM, bN, bO, bP), { rtol ? 0.00001, atol ? 0.00000001 } ->
-    Num.isApproxEq aA bA { rtol, atol } && Num.isApproxEq aB bB { rtol, atol } && Num.isApproxEq aC bC { rtol, atol } && Num.isApproxEq aD bD { rtol, atol } && Num.isApproxEq aE bE { rtol, atol } && Num.isApproxEq aF bF { rtol, atol } && Num.isApproxEq aG bG { rtol, atol } && Num.isApproxEq aH bH { rtol, atol } && Num.isApproxEq aI bI { rtol, atol } && Num.isApproxEq aJ bJ { rtol, atol } && Num.isApproxEq aK bK { rtol, atol } && Num.isApproxEq aL bL { rtol, atol } && Num.isApproxEq aM bM { rtol, atol } && Num.isApproxEq aN bN { rtol, atol } && Num.isApproxEq aO bO { rtol, atol } && Num.isApproxEq aP bP { rtol, atol }
+isApproxEq = \@Matrix4x4 (a1ˏ1, a2ˏ1, a3ˏ1, a4ˏ1, a1ˏ2, a2ˏ2, a3ˏ2, a4ˏ2, a1ˏ3, a2ˏ3, a3ˏ3, a4ˏ3, a1ˏ4, a2ˏ4, a3ˏ4, a4ˏ4), @Matrix4x4 (b1ˏ1, b2ˏ1, b3ˏ1, b4ˏ1, b1ˏ2, b2ˏ2, b3ˏ2, b4ˏ2, b1ˏ3, b2ˏ3, b3ˏ3, b4ˏ3, b1ˏ4, b2ˏ4, b3ˏ4, b4ˏ4), { rtol ? 0.00001, atol ? 0.00000001 } ->
+    Num.isApproxEq a1ˏ1 b1ˏ1 { rtol, atol } && Num.isApproxEq a2ˏ1 b2ˏ1 { rtol, atol } && Num.isApproxEq a3ˏ1 b3ˏ1 { rtol, atol } && Num.isApproxEq a4ˏ1 b4ˏ1 { rtol, atol } && Num.isApproxEq a1ˏ2 b1ˏ2 { rtol, atol } && Num.isApproxEq a2ˏ2 b2ˏ2 { rtol, atol } && Num.isApproxEq a3ˏ2 b3ˏ2 { rtol, atol } && Num.isApproxEq a4ˏ2 b4ˏ2 { rtol, atol } && Num.isApproxEq a1ˏ3 b1ˏ3 { rtol, atol } && Num.isApproxEq a2ˏ3 b2ˏ3 { rtol, atol } && Num.isApproxEq a3ˏ3 b3ˏ3 { rtol, atol } && Num.isApproxEq a4ˏ3 b4ˏ3 { rtol, atol } && Num.isApproxEq a1ˏ4 b1ˏ4 { rtol, atol } && Num.isApproxEq a2ˏ4 b2ˏ4 { rtol, atol } && Num.isApproxEq a3ˏ4 b3ˏ4 { rtol, atol } && Num.isApproxEq a4ˏ4 b4ˏ4 { rtol, atol }

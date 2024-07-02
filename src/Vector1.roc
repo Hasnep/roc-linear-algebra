@@ -24,35 +24,37 @@ ones = 1
 fromList : List F64 -> Result Vector1 [InvalidSize]
 fromList = \list ->
     when list is
-        [a] -> Ok (a)
+        [v1] -> Ok (v1)
         _ -> Err InvalidSize
 
 toList : Vector1 -> List F64
-toList = \a -> [a]
+toList = \v1 ->
+    [v1]
 
 display : Vector1 -> Str
-display = \a ->
-    Str.joinWith ["[", Num.toStr a, "]"] ""
+display = \v1 ->
+    Str.joinWith ["[", Num.toStr v1, "]"] ""
 
 add : Vector1, Vector1 -> Vector1
-add = \aA, bA ->
-    (aA + bA)
+add = \a1, b1 ->
+    (a1 + b1)
 
 sub : Vector1, Vector1 -> Vector1
-sub = \aA, bA ->
-    (aA - bA)
+sub = \a1, b1 ->
+    (a1 - b1)
 
 elementwiseMul : Vector1, Vector1 -> Vector1
-elementwiseMul = \aA, bA ->
-    (aA * bA)
+elementwiseMul = \a1, b1 ->
+    (a1 * b1)
 
 div : Vector1, Vector1 -> Vector1
-div = \aA, bA ->
-    (aA / bA)
+div = \a1, b1 ->
+    (a1 / b1)
 
 dot : Vector1, Vector1 -> F64
-dot = \aA, bA -> aA * bA
+dot = \a1, b1 ->
+    a1 * b1
 
 isApproxEq : Vector1, Vector1, { rtol ? F64, atol ? F64 } -> Bool
-isApproxEq = \aA, bA, { rtol ? 0.00001, atol ? 0.00000001 } ->
-    Num.isApproxEq aA bA { rtol, atol }
+isApproxEq = \a1, b1, { rtol ? 0.00001, atol ? 0.00000001 } ->
+    Num.isApproxEq a1 b1 { rtol, atol }

@@ -18,21 +18,21 @@ ones : Matrix4x2
 ones = @Matrix4x2 (1, 1, 1, 1, 1, 1, 1, 1)
 
 add : Matrix4x2, Matrix4x2 -> Matrix4x2
-add = \@Matrix4x2 (aA, aB, aC, aD, aE, aF, aG, aH), @Matrix4x2 (bA, bB, bC, bD, bE, bF, bG, bH) ->
-    @Matrix4x2 (aA + bA, aB + bB, aC + bC, aD + bD, aE + bE, aF + bF, aG + bG, aH + bH)
+add = \@Matrix4x2 (a1ˏ1, a2ˏ1, a3ˏ1, a4ˏ1, a1ˏ2, a2ˏ2, a3ˏ2, a4ˏ2), @Matrix4x2 (b1ˏ1, b2ˏ1, b3ˏ1, b4ˏ1, b1ˏ2, b2ˏ2, b3ˏ2, b4ˏ2) ->
+    @Matrix4x2 (a1ˏ1 + b1ˏ1, a2ˏ1 + b2ˏ1, a3ˏ1 + b3ˏ1, a4ˏ1 + b4ˏ1, a1ˏ2 + b1ˏ2, a2ˏ2 + b2ˏ2, a3ˏ2 + b3ˏ2, a4ˏ2 + b4ˏ2)
 
 sub : Matrix4x2, Matrix4x2 -> Matrix4x2
-sub = \@Matrix4x2 (aA, aB, aC, aD, aE, aF, aG, aH), @Matrix4x2 (bA, bB, bC, bD, bE, bF, bG, bH) ->
-    @Matrix4x2 (aA - bA, aB - bB, aC - bC, aD - bD, aE - bE, aF - bF, aG - bG, aH - bH)
+sub = \@Matrix4x2 (a1ˏ1, a2ˏ1, a3ˏ1, a4ˏ1, a1ˏ2, a2ˏ2, a3ˏ2, a4ˏ2), @Matrix4x2 (b1ˏ1, b2ˏ1, b3ˏ1, b4ˏ1, b1ˏ2, b2ˏ2, b3ˏ2, b4ˏ2) ->
+    @Matrix4x2 (a1ˏ1 - b1ˏ1, a2ˏ1 - b2ˏ1, a3ˏ1 - b3ˏ1, a4ˏ1 - b4ˏ1, a1ˏ2 - b1ˏ2, a2ˏ2 - b2ˏ2, a3ˏ2 - b3ˏ2, a4ˏ2 - b4ˏ2)
 
 elementwiseMul : Matrix4x2, Matrix4x2 -> Matrix4x2
-elementwiseMul = \@Matrix4x2 (aA, aB, aC, aD, aE, aF, aG, aH), @Matrix4x2 (bA, bB, bC, bD, bE, bF, bG, bH) ->
-    @Matrix4x2 (aA * bA, aB * bB, aC * bC, aD * bD, aE * bE, aF * bF, aG * bG, aH * bH)
+elementwiseMul = \@Matrix4x2 (a1ˏ1, a2ˏ1, a3ˏ1, a4ˏ1, a1ˏ2, a2ˏ2, a3ˏ2, a4ˏ2), @Matrix4x2 (b1ˏ1, b2ˏ1, b3ˏ1, b4ˏ1, b1ˏ2, b2ˏ2, b3ˏ2, b4ˏ2) ->
+    @Matrix4x2 (a1ˏ1 * b1ˏ1, a2ˏ1 * b2ˏ1, a3ˏ1 * b3ˏ1, a4ˏ1 * b4ˏ1, a1ˏ2 * b1ˏ2, a2ˏ2 * b2ˏ2, a3ˏ2 * b3ˏ2, a4ˏ2 * b4ˏ2)
 
 div : Matrix4x2, Matrix4x2 -> Matrix4x2
-div = \@Matrix4x2 (aA, aB, aC, aD, aE, aF, aG, aH), @Matrix4x2 (bA, bB, bC, bD, bE, bF, bG, bH) ->
-    @Matrix4x2 (aA / bA, aB / bB, aC / bC, aD / bD, aE / bE, aF / bF, aG / bG, aH / bH)
+div = \@Matrix4x2 (a1ˏ1, a2ˏ1, a3ˏ1, a4ˏ1, a1ˏ2, a2ˏ2, a3ˏ2, a4ˏ2), @Matrix4x2 (b1ˏ1, b2ˏ1, b3ˏ1, b4ˏ1, b1ˏ2, b2ˏ2, b3ˏ2, b4ˏ2) ->
+    @Matrix4x2 (a1ˏ1 / b1ˏ1, a2ˏ1 / b2ˏ1, a3ˏ1 / b3ˏ1, a4ˏ1 / b4ˏ1, a1ˏ2 / b1ˏ2, a2ˏ2 / b2ˏ2, a3ˏ2 / b3ˏ2, a4ˏ2 / b4ˏ2)
 
 isApproxEq : Matrix4x2, Matrix4x2, { rtol ? F64, atol ? F64 } -> Bool
-isApproxEq = \@Matrix4x2 (aA, aB, aC, aD, aE, aF, aG, aH), @Matrix4x2 (bA, bB, bC, bD, bE, bF, bG, bH), { rtol ? 0.00001, atol ? 0.00000001 } ->
-    Num.isApproxEq aA bA { rtol, atol } && Num.isApproxEq aB bB { rtol, atol } && Num.isApproxEq aC bC { rtol, atol } && Num.isApproxEq aD bD { rtol, atol } && Num.isApproxEq aE bE { rtol, atol } && Num.isApproxEq aF bF { rtol, atol } && Num.isApproxEq aG bG { rtol, atol } && Num.isApproxEq aH bH { rtol, atol }
+isApproxEq = \@Matrix4x2 (a1ˏ1, a2ˏ1, a3ˏ1, a4ˏ1, a1ˏ2, a2ˏ2, a3ˏ2, a4ˏ2), @Matrix4x2 (b1ˏ1, b2ˏ1, b3ˏ1, b4ˏ1, b1ˏ2, b2ˏ2, b3ˏ2, b4ˏ2), { rtol ? 0.00001, atol ? 0.00000001 } ->
+    Num.isApproxEq a1ˏ1 b1ˏ1 { rtol, atol } && Num.isApproxEq a2ˏ1 b2ˏ1 { rtol, atol } && Num.isApproxEq a3ˏ1 b3ˏ1 { rtol, atol } && Num.isApproxEq a4ˏ1 b4ˏ1 { rtol, atol } && Num.isApproxEq a1ˏ2 b1ˏ2 { rtol, atol } && Num.isApproxEq a2ˏ2 b2ˏ2 { rtol, atol } && Num.isApproxEq a3ˏ2 b3ˏ2 { rtol, atol } && Num.isApproxEq a4ˏ2 b4ˏ2 { rtol, atol }

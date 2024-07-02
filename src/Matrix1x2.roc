@@ -21,25 +21,25 @@ ones : Matrix1x2
 ones = @Matrix1x2 (1, 1)
 
 fromVector : Vector2.Vector2 -> Matrix1x2
-fromVector = \(a, b) ->
-    @Matrix1x2 (a, b)
+fromVector = \(x1, x2) ->
+    @Matrix1x2 (x1, x2)
 
 add : Matrix1x2, Matrix1x2 -> Matrix1x2
-add = \@Matrix1x2 (aA, aB), @Matrix1x2 (bA, bB) ->
-    @Matrix1x2 (aA + bA, aB + bB)
+add = \@Matrix1x2 (a1ˏ1, a1ˏ2), @Matrix1x2 (b1ˏ1, b1ˏ2) ->
+    @Matrix1x2 (a1ˏ1 + b1ˏ1, a1ˏ2 + b1ˏ2)
 
 sub : Matrix1x2, Matrix1x2 -> Matrix1x2
-sub = \@Matrix1x2 (aA, aB), @Matrix1x2 (bA, bB) ->
-    @Matrix1x2 (aA - bA, aB - bB)
+sub = \@Matrix1x2 (a1ˏ1, a1ˏ2), @Matrix1x2 (b1ˏ1, b1ˏ2) ->
+    @Matrix1x2 (a1ˏ1 - b1ˏ1, a1ˏ2 - b1ˏ2)
 
 elementwiseMul : Matrix1x2, Matrix1x2 -> Matrix1x2
-elementwiseMul = \@Matrix1x2 (aA, aB), @Matrix1x2 (bA, bB) ->
-    @Matrix1x2 (aA * bA, aB * bB)
+elementwiseMul = \@Matrix1x2 (a1ˏ1, a1ˏ2), @Matrix1x2 (b1ˏ1, b1ˏ2) ->
+    @Matrix1x2 (a1ˏ1 * b1ˏ1, a1ˏ2 * b1ˏ2)
 
 div : Matrix1x2, Matrix1x2 -> Matrix1x2
-div = \@Matrix1x2 (aA, aB), @Matrix1x2 (bA, bB) ->
-    @Matrix1x2 (aA / bA, aB / bB)
+div = \@Matrix1x2 (a1ˏ1, a1ˏ2), @Matrix1x2 (b1ˏ1, b1ˏ2) ->
+    @Matrix1x2 (a1ˏ1 / b1ˏ1, a1ˏ2 / b1ˏ2)
 
 isApproxEq : Matrix1x2, Matrix1x2, { rtol ? F64, atol ? F64 } -> Bool
-isApproxEq = \@Matrix1x2 (aA, aB), @Matrix1x2 (bA, bB), { rtol ? 0.00001, atol ? 0.00000001 } ->
-    Num.isApproxEq aA bA { rtol, atol } && Num.isApproxEq aB bB { rtol, atol }
+isApproxEq = \@Matrix1x2 (a1ˏ1, a1ˏ2), @Matrix1x2 (b1ˏ1, b1ˏ2), { rtol ? 0.00001, atol ? 0.00000001 } ->
+    Num.isApproxEq a1ˏ1 b1ˏ1 { rtol, atol } && Num.isApproxEq a1ˏ2 b1ˏ2 { rtol, atol }

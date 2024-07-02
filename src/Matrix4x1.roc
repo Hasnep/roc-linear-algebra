@@ -21,25 +21,25 @@ ones : Matrix4x1
 ones = @Matrix4x1 (1, 1, 1, 1)
 
 fromVector : Vector4.Vector4 -> Matrix4x1
-fromVector = \(a, b, c, d) ->
-    @Matrix4x1 (a, b, c, d)
+fromVector = \(x1, x2, x3, x4) ->
+    @Matrix4x1 (x1, x2, x3, x4)
 
 add : Matrix4x1, Matrix4x1 -> Matrix4x1
-add = \@Matrix4x1 (aA, aB, aC, aD), @Matrix4x1 (bA, bB, bC, bD) ->
-    @Matrix4x1 (aA + bA, aB + bB, aC + bC, aD + bD)
+add = \@Matrix4x1 (a1ˏ1, a2ˏ1, a3ˏ1, a4ˏ1), @Matrix4x1 (b1ˏ1, b2ˏ1, b3ˏ1, b4ˏ1) ->
+    @Matrix4x1 (a1ˏ1 + b1ˏ1, a2ˏ1 + b2ˏ1, a3ˏ1 + b3ˏ1, a4ˏ1 + b4ˏ1)
 
 sub : Matrix4x1, Matrix4x1 -> Matrix4x1
-sub = \@Matrix4x1 (aA, aB, aC, aD), @Matrix4x1 (bA, bB, bC, bD) ->
-    @Matrix4x1 (aA - bA, aB - bB, aC - bC, aD - bD)
+sub = \@Matrix4x1 (a1ˏ1, a2ˏ1, a3ˏ1, a4ˏ1), @Matrix4x1 (b1ˏ1, b2ˏ1, b3ˏ1, b4ˏ1) ->
+    @Matrix4x1 (a1ˏ1 - b1ˏ1, a2ˏ1 - b2ˏ1, a3ˏ1 - b3ˏ1, a4ˏ1 - b4ˏ1)
 
 elementwiseMul : Matrix4x1, Matrix4x1 -> Matrix4x1
-elementwiseMul = \@Matrix4x1 (aA, aB, aC, aD), @Matrix4x1 (bA, bB, bC, bD) ->
-    @Matrix4x1 (aA * bA, aB * bB, aC * bC, aD * bD)
+elementwiseMul = \@Matrix4x1 (a1ˏ1, a2ˏ1, a3ˏ1, a4ˏ1), @Matrix4x1 (b1ˏ1, b2ˏ1, b3ˏ1, b4ˏ1) ->
+    @Matrix4x1 (a1ˏ1 * b1ˏ1, a2ˏ1 * b2ˏ1, a3ˏ1 * b3ˏ1, a4ˏ1 * b4ˏ1)
 
 div : Matrix4x1, Matrix4x1 -> Matrix4x1
-div = \@Matrix4x1 (aA, aB, aC, aD), @Matrix4x1 (bA, bB, bC, bD) ->
-    @Matrix4x1 (aA / bA, aB / bB, aC / bC, aD / bD)
+div = \@Matrix4x1 (a1ˏ1, a2ˏ1, a3ˏ1, a4ˏ1), @Matrix4x1 (b1ˏ1, b2ˏ1, b3ˏ1, b4ˏ1) ->
+    @Matrix4x1 (a1ˏ1 / b1ˏ1, a2ˏ1 / b2ˏ1, a3ˏ1 / b3ˏ1, a4ˏ1 / b4ˏ1)
 
 isApproxEq : Matrix4x1, Matrix4x1, { rtol ? F64, atol ? F64 } -> Bool
-isApproxEq = \@Matrix4x1 (aA, aB, aC, aD), @Matrix4x1 (bA, bB, bC, bD), { rtol ? 0.00001, atol ? 0.00000001 } ->
-    Num.isApproxEq aA bA { rtol, atol } && Num.isApproxEq aB bB { rtol, atol } && Num.isApproxEq aC bC { rtol, atol } && Num.isApproxEq aD bD { rtol, atol }
+isApproxEq = \@Matrix4x1 (a1ˏ1, a2ˏ1, a3ˏ1, a4ˏ1), @Matrix4x1 (b1ˏ1, b2ˏ1, b3ˏ1, b4ˏ1), { rtol ? 0.00001, atol ? 0.00000001 } ->
+    Num.isApproxEq a1ˏ1 b1ˏ1 { rtol, atol } && Num.isApproxEq a2ˏ1 b2ˏ1 { rtol, atol } && Num.isApproxEq a3ˏ1 b3ˏ1 { rtol, atol } && Num.isApproxEq a4ˏ1 b4ˏ1 { rtol, atol }
